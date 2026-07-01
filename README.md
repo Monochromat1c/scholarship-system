@@ -1,59 +1,70 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Local Scholarship Management System (LSMS)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A specialized administrative system designed for local government units and organizations to manage, track, and rank scholarship applicants efficiently. The system automates the selection process based on academic merit while allowing real-time roster adjustments.
 
-## About Laravel
+## Core Architecture & Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 1. Dynamic Merit-Based Sorting
+The system automatically processes and sorts all applicant records dynamically based on their entrance/qualification exam scores. 
+* Order: Descending order (Highest score ranked 1st).
+* Tie-breaking: Configurable by submission timestamp or secondary criteria (e.g., GPA) to maintain deterministic ordering.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 2. The "Top 300" Rolling Roster Constraint
+To comply with local quota limits, the primary administrative dashboard enforces a strict display window:
+* Only the top 300 qualified applicants are rendered in the active management table.
+* Applicants ranked 301 and below are securely maintained in the background database as a pending queue.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 3. Real-Time Cascading Replacement Queue
+The system features an automated, cascading queue mechanism to handle disqualifications, document deficiencies, or voluntary withdrawals.
+* Action: When an administrator removes or disqualifies a student within the active top 300 roster (e.g., the 51st ranked applicant is removed due to a lack of physical qualifications), the system triggers an immediate recalculation.
+* Behavior: The student ranked 301st is automatically promoted into the active 300-student display pool in real time, shifting all intermediate ranks seamlessly.
 
-## Learning Laravel
+[All Applicants Matrix] ──(Sorted by Exam Score)──> [Ranked Queue]
+                                                           │
+             ┌─────────────────────────────────────────────┴─────────────┐
+             ▼                                                           ▼
+   ┌────────────────────┐                                      ┌────────────────────┐
+   │ Active Dashboard   │ <──[Auto-Promotion of Rank 301]───── │ Pending Queue      │
+   │ (Ranks 1 to 300)   │                                      │ (Ranks 301+)       │
+   └────────────────────┘                                      └────────────────────┘
+             │
+     (Admin Removes 
+      Unqualified Student)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Technical Specifications & Features Roadmap
 
-## Laravel Sponsors
+| Feature Status | Capabilities | Details |
+| :--- | :--- | :--- |
+| Implemented | Applicant Recording | CRUD operations to ingest applicant profile details (Name, Contact, Address, Exam Score). |
+| Implemented | Live Score Sorting | Automated backend/frontend sorting algorithms ensuring high-to-low positioning. |
+| Implemented | Windowed Display | Strict limit constraints preventing more than 300 records from flooding the primary viewport. |
+| Planned (v2.0) | Administrative Override | Verification checkboxes to flag and "Remove/Disqualify" records with automatic cascading re-indexing. |
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Data Structure Concept
+Each applicant record is tracked via the following schema structure:
 
-### Premium Partners
+{
+  "applicant_id": "SCH-2026-0042",
+  "full_name": "Jane Doe",
+  "exam_score": 94.5,
+  "submission_date": "2026-07-01T10:30:00Z",
+  "is_qualified": true
+}
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## System Requirements & Installation
+*(Update these instructions depending on your selected stack, e.g., Node.js, Python, or PHP)*
 
-## Contributing
+1. Clone this repository:
+   git clone https://github.com/your-username/local-scholarship-system.git
+   cd local-scholarship-system
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. Install dependencies:
+   npm install
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+3. Run the development server:
+   npm run dev
 
 ## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Distributed under the MIT License. See LICENSE for more information.
