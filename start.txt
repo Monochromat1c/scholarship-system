@@ -1,0 +1,31 @@
+# 1. Pull latest code
+git pull
+
+# 2. Install dependencies
+composer install
+npm install
+
+# 3. Setup environment (if no .env)
+cp .env.example .env
+php artisan key:generate
+
+# 4. Create database
+touch database/database.sqlite
+
+# 5. Run migrations and seeders
+php artisan migrate
+php artisan db:seed
+
+# 6. Clear caches
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+php artisan route:clear
+
+# 7. Start servers
+php artisan serve
+npm run dev
+
+**Dummy data
+email: admin@scholarship.com
+password: password
